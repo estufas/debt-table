@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 
-import Table from "./Table";
-import AddRow from "./AddRow";
+import Table from "./tableComponents/Table";
+import AddRow from "./tableComponents/AddRow";
 import "./App.css";
 
 function App() {
@@ -35,20 +35,26 @@ function App() {
           {
             Header: "Balance",
             accessor: "balance",
+            Cell: props => <div> ${props.value} </div>,
             Footer: info => {
               // Only calculate total visits if rows change
               const total = useMemo(
                 () => {
                   let sum = 0;
+                  let counter = 0;
                   info.rows.forEach(e => {
                     if(e.isSelected) {
-                      sum += parseFloat(e.original.balance)
+                      sum += parseFloat(e.original.balance);
+                      counter += 1;
                     }
                   })
-                  return sum;
+                  return {
+                    "sum": sum,
+                    "counter": counter
+                  }
                 }
               )
-              return <>Total: {total}</>
+              return <>Total: ${total.sum} from {total.counter} selected</>
             },
           }
         ]
@@ -56,6 +62,8 @@ function App() {
     ],
     []
   );
+
+  // Set state for table data and new Row
   const [tableData, setTableData] = useState([]);
   const [newRow, setRow] = useState({
     id: "",
@@ -65,7 +73,6 @@ function App() {
     minPaymentPercentage: "",
     balance: 0
   });
-  const [selectedRows, setSelectedRows] = useState({});
 
   // Receive data from TableRow
   const handleChange = data => {
@@ -89,6 +96,7 @@ function App() {
     })
   };
 
+  // Reset table data to original state
   const resetDebtTable = async () => {
     let result = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", {
       "functionName": "resetData"
@@ -96,7 +104,7 @@ function App() {
     setTableData(result.data.data);
   };
 
-  // Remove Table row if rows are count is more than 1
+  // Remove Table rows from S3 version
   const deleteRow = async (rows) => {
     let deleteRows = [];
     rows.forEach(e => {
@@ -106,11 +114,11 @@ function App() {
       "functionName": "removeRow",
       "data": deleteRows
     };
-    console.log(reqData);
     let updatedDAta = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", reqData);
     setTableData(updatedDAta.data.data);
   };
 
+  // Update row objt on change
   const updateRow = ({ target }) => {
     // Update query onKeyPress of input box
     let value = target.value;
