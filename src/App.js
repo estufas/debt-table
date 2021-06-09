@@ -42,7 +42,9 @@ function App() {
                 () => {
                   let sum = 0;
                   let counter = 0;
+                  let totalRows = 0;
                   info.rows.forEach(e => {
+                    totalRows += 1;
                     if(e.isSelected) {
                       sum += parseFloat(e.original.balance);
                       counter += 1;
@@ -50,11 +52,12 @@ function App() {
                   })
                   return {
                     "sum": sum,
-                    "counter": counter
+                    "counter": counter,
+                    "totalRows": totalRows
                   }
                 }
               )
-              return <>Total: ${total.sum} from {total.counter} selected</>
+              return <>Total: ${total.sum} <div className="footer-total-text"><b>{total.counter}/{total.totalRows} selected</b></div>  </>
             },
           }
         ]
