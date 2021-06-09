@@ -73,33 +73,52 @@ function App() {
   };
 
   // Add New Table Row
-  const addNewRow = () => {
-    setTableData(tableData => tableData.concat(newRow));
+  const addNewRow = async (e) => {
+    let result = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", {
+      "functionName": "addRow",
+      "data": newRow
+    });
+    setTableData(result.data.data);
+    setRow({
+      id: "",
+      firstName: "",
+      lastName: "",
+      creditorName: "",
+      minPaymentPercentage: "",
+      balance: 0
+    })
   };
 
-  const sumSelected = (rows) => {
-    console.log(rows)
-  }
+  const resetDebtTable = async () => {
+    let result = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", {
+      "functionName": "resetData"
+    });
+    setTableData(result.data.data);
+  };
 
   // Remove Table row if rows are count is more than 1
-  const deleteRow = (rows) => {
-    setSelectedRows(rows);
-    let updatedRows = [...tableData]
-    rows.forEach(element => {
-      if(element.id > -1){
-        updatedRows.splice((element.id), 1)
-        setTableData(updatedRows);
-      }
-    });
+  const deleteRow = async (rows) => {
+    let deleteRows = [];
+    rows.forEach(e => {
+      deleteRows.push(e.original);
+    })
+    let reqData = {
+      "functionName": "removeRow",
+      "data": deleteRows
+    };
+    console.log(reqData);
+    let updatedDAta = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", reqData);
+    setTableData(updatedDAta.data.data);
   };
 
   const updateRow = ({ target }) => {
     // Update query onKeyPress of input box
-    console.log(target.value);
+    let value = target.value;
+    if (target.type == "text") value = value.charAt(0).toUpperCase() + value.slice(1);
     setRow({
         ...newRow,
         id: tableData.length + 1,
-        [target.name]: target.value
+        [target.name]: value
       }
     );
   };
@@ -113,21 +132,24 @@ function App() {
 
   const submitHandler = e => {
     // Prevent form submission on Enter key
+    console.log(e)
     e.preventDefault()
   };
 
   useEffect(() => {
       (async () => {
-        const result = await axios("https://raw.githubusercontent.com/StrategicFS/Recruitment/master/data.json");
-        setTableData(result.data);
+        const result = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", {
+          "functionName": "queryData"
+        });
+        setTableData(result.data.data);
       })();
     }, []);
 
   return (
 
     <div className="App">
-      <Table columns={columns} data={tableData} handleDataChange={handleChange} deleteRow={deleteRow} />
-      <AddRow updateRow={updateRow} keyPressed={keyPressed} newRow={newRow} submitHandler={submitHandler} addNewRow={addNewRow} sumSelected={sumSelected}/>
+      <Table columns={columns} data={tableData} handleDataChange={handleChange} deleteRow={deleteRow} resetDebtTable={resetDebtTable}/>
+      <AddRow updateRow={updateRow} keyPressed={keyPressed} newRow={newRow} submitHandler={submitHandler} addNewRow={addNewRow} />
     </div>
   );
 }

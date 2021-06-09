@@ -3,7 +3,7 @@ import React, { useState } from "react";
 export default function AddRow({submitHandler, newRow, updateRow, keyPressed, addNewRow}) {
 
   return (
-    <form onSubmit={submitHandler}>
+    <form id="add-row-form-id" className="add-row-form" onSubmit={submitHandler}>
       <div>
         <input
           className="creditorName"
@@ -35,7 +35,7 @@ export default function AddRow({submitHandler, newRow, updateRow, keyPressed, ad
         <input
           className="minPaymentPercentage"
           placeholder="Min Payment %"
-          type="text"
+          type="number"
           name="minPaymentPercentage"
           value={newRow.minPaymentPercentage}
           onChange={updateRow}
@@ -51,7 +51,7 @@ export default function AddRow({submitHandler, newRow, updateRow, keyPressed, ad
           onKeyPress={keyPressed}
         />
         <button
-          className="search-field-button"
+          className="add-row-button"
           type="button"
           onClick={addNewRow}
         >

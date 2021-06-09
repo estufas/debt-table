@@ -18,7 +18,7 @@ const IndeterminateCheckbox = React.forwardRef(
   }
 )
 
-export default function Table({ columns, data, deleteRow, sumSelected }) {
+export default function Table({ columns, data, deleteRow, resetDebtTable }) {
   // Use the state and functions returned from useTable to build your UI
   const {
       getTableProps,
@@ -59,8 +59,9 @@ export default function Table({ columns, data, deleteRow, sumSelected }) {
 
   return (
     <>
+      <div className="button-container">
         <button
-          className="search-field-button"
+          className="delete-button"
           type="button"
           onClick={() => {
             deleteRow(selectedFlatRows);
@@ -68,6 +69,11 @@ export default function Table({ columns, data, deleteRow, sumSelected }) {
         >
           Delete Selected
         </button>
+        <button className="reset-button" onClick={resetDebtTable}>
+          Reset Table
+        </button>
+      </div>
+
       <table {...getTableProps()}>
         <thead>
         {headerGroups.map(headerGroup => (
@@ -90,7 +96,7 @@ export default function Table({ columns, data, deleteRow, sumSelected }) {
             <tr id={`id-${row.id}`} {...row.getRowProps()}>
               {row.cells.map(cell => {
                 return (
-                  <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                  <td className="table-cell" {...cell.getCellProps()}>{cell.render("Cell")}</td>
                 );
               })}
             </tr>

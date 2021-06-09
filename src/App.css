@@ -53,11 +53,64 @@ table th.sort-desc::before {
   font-weight: bold;
   text-transform: uppercase;
 }
-input {
-  padding: 10px;
-  margin-bottom: 20px;
-  font-size: 18px;
+/*input {*/
+/*  padding: 10px;*/
+/*  margin-bottom: 20px;*/
+/*  font-size: 18px;*/
+/*  border-radius: 5px;*/
+/*  border: 1px solid #ddd;*/
+/*  box-shadow: none;*/
+/*}*/
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: #eee;
+  border: 1px solid #000;
+}
+
+.reset-button {
+  width: 150px;
+  height: 40px;
+  margin: 10px;
+}
+
+.delete-button {
+  width: 150px;
+  height: 40px;
+  margin: 10px;
+}
+
+.add-row-button {
+  width: 100px;
+  height: 40px;
+  margin: 5px;
+  background-color: #000;
+  color: #fafafa;
+  border: solid 1px #fafafa;
+}
+
+.add-row-form {
+  width: 100%;
+  margin: 15px 0px;
+  background-color: #eeeeee;
+  border: 1px solid #000;
+}
+
+.add-row-form div {
+  display: flex;
+  flex-direction: row;
+}
+
+.add-row-form div input {
+  padding: 5px;
+  margin: 10px 13px;
+  font-size: 12px;
   border-radius: 5px;
   border: 1px solid #ddd;
-  box-shadow: none;
+}
+
+.table-cell div {
+  display: flex;
+  justify-content: center;
 }
