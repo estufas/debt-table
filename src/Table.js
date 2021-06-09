@@ -1,39 +1,73 @@
-import React, { useState } from "react";
-import { useTable, useFilters, useSortBy } from "react-table";
+import React, { useState, useEffect } from "react";
+import { useTable, useFilters, useSortBy, useRowSelect } from "react-table";
 
-export default function Table({ columns, data }) {
-  const [filterInput, setFilterInput] = useState("");
+const IndeterminateCheckbox = React.forwardRef(
+  ({ indeterminate, ...rest }, ref) => {
+    const defaultRef = React.useRef()
+    const resolvedRef = ref || defaultRef
+
+    React.useEffect(() => {
+      resolvedRef.current.indeterminate = indeterminate
+    }, [resolvedRef, indeterminate])
+
+    return (
+      <>
+        <input type="checkbox" ref={resolvedRef} {...rest} />
+      </>
+    )
+  }
+)
+
+export default function Table({ columns, data, deleteRow, sumSelected }) {
   // Use the state and functions returned from useTable to build your UI
   const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    setFilter
-  } = useTable(
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      footerGroups,
+      rows,
+      prepareRow,
+      selectedFlatRows,
+      state: { selectedRowIds },
+    } = useTable(
     {
       columns,
       data
     },
     useFilters,
-    useSortBy
+    useSortBy,
+    useRowSelect,
+    hooks => {
+      hooks.visibleColumns.push(columns => [
+        {
+          id: 'selection',
+          Header: ({ getToggleAllRowsSelectedProps }) => (
+            <div>
+              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+            </div>
+          ),
+          Cell: ({ row }) => (
+            <div>
+              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            </div>
+          ),
+        },
+        ...columns,
+      ])
+    }
   );
 
-  const handleFilterChange = e => {
-    const value = e.target.value || undefined;
-    setFilter("show.name", value);
-    setFilterInput(value);
-  };
-
-  // Render the UI for your table
   return (
     <>
-      <input
-        value={filterInput}
-        onChange={handleFilterChange}
-        placeholder={"Search name"}
-      />
+        <button
+          className="search-field-button"
+          type="button"
+          onClick={() => {
+            deleteRow(selectedFlatRows);
+          }}
+        >
+          Delete Selected
+        </button>
       <table {...getTableProps()}>
         <thead>
         {headerGroups.map(headerGroup => (
@@ -41,13 +75,7 @@ export default function Table({ columns, data }) {
             {headerGroup.headers.map(column => (
               <th
                 {...column.getHeaderProps(column.getSortByToggleProps())}
-                className={
-                  column.isSorted
-                    ? column.isSortedDesc
-                    ? "sort-desc"
-                    : "sort-asc"
-                    : ""
-                }
+                className="debt-table"
               >
                 {column.render("Header")}
               </th>
@@ -59,7 +87,7 @@ export default function Table({ columns, data }) {
         {rows.map((row, i) => {
           prepareRow(row);
           return (
-            <tr {...row.getRowProps()}>
+            <tr id={`id-${row.id}`} {...row.getRowProps()}>
               {row.cells.map(cell => {
                 return (
                   <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
@@ -69,6 +97,15 @@ export default function Table({ columns, data }) {
           );
         })}
         </tbody>
+        <tfoot>
+        {footerGroups.map(group => (
+          <tr {...group.getFooterGroupProps()}>
+            {group.headers.map(column => (
+              <td {...column.getFooterProps()}>{column.render('Footer')}</td>
+            ))}
+          </tr>
+        ))}
+        </tfoot>
       </table>
     </>
   );

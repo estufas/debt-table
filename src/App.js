@@ -2,86 +2,132 @@ import React, { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 
 import Table from "./Table";
+import AddRow from "./AddRow";
 import "./App.css";
-
-const Genres = ({ values }) => {
-  return (
-    <>
-      {values.map((genre, idx) => {
-        return (
-          <span key={idx} className="badge">
-            {genre}
-          </span>
-        );
-      })}
-    </>
-  );
-};
 
 function App() {
   const columns = useMemo(
     () => [
       {
-        Header: "TV Show",
+        Header: "Banking Sheet",
+        Footer: "Totals",
         columns: [
           {
-            Header: "Name",
-            accessor: "show.name"
+            Header: "Creditor",
+            accessor: "creditorName",
+            Footer: 'Creditor',
           },
           {
-            Header: "Type",
-            accessor: "show.type"
-          }
-        ]
-      },
-      {
-        Header: "Details",
-        columns: [
-          {
-            Header: "Language",
-            accessor: "show.language"
+            Header: "First Name",
+            accessor: "firstName",
+            Footer: 'First Name',
           },
           {
-            Header: "Genre(s)",
-            accessor: "show.genres",
-            Cell: ({ cell: { value } }) => <Genres values={value} />
+            Header: "Last Name",
+            accessor: "lastName",
+            Footer: 'Last Name',
           },
           {
-            Header: "Runtime",
-            accessor: "show.runtime",
-            Cell: ({ cell: { value } }) => {
-              const hour = Math.floor(value / 60);
-              const min = Math.floor(value % 60);
-              return (
-                <>
-                  {hour > 0 ? `${hour} hr${hour > 1 ? "s" : ""} ` : ""}
-                  {min > 0 ? `${min} min${min > 1 ? "s" : ""}` : ""}
-                </>
-              );
-            }
+            Header: "Min Pay %",
+            accessor: "minPaymentPercentage",
+            Footer: 'Min Pay %',
           },
           {
-            Header: "Status",
-            accessor: "show.status"
+            Header: "Balance",
+            accessor: "balance",
+            Footer: info => {
+              // Only calculate total visits if rows change
+              const total = useMemo(
+                () => {
+                  let sum = 0;
+                  info.rows.forEach(e => {
+                    if(e.isSelected) {
+                      sum += parseFloat(e.original.balance)
+                    }
+                  })
+                  return sum;
+                }
+              )
+              return <>Total: {total}</>
+            },
           }
         ]
       }
     ],
     []
   );
+  const [tableData, setTableData] = useState([]);
+  const [newRow, setRow] = useState({
+    id: "",
+    firstName: "",
+    lastName: "",
+    creditorName: "",
+    minPaymentPercentage: "",
+    balance: 0
+  });
+  const [selectedRows, setSelectedRows] = useState({});
 
-  const [data, setData] = useState([]);
+  // Receive data from TableRow
+  const handleChange = data => {
+    tableData[data.index] = data
+  };
+
+  // Add New Table Row
+  const addNewRow = () => {
+    setTableData(tableData => tableData.concat(newRow));
+  };
+
+  const sumSelected = (rows) => {
+    console.log(rows)
+  }
+
+  // Remove Table row if rows are count is more than 1
+  const deleteRow = (rows) => {
+    setSelectedRows(rows);
+    let updatedRows = [...tableData]
+    rows.forEach(element => {
+      if(element.id > -1){
+        updatedRows.splice((element.id), 1)
+        setTableData(updatedRows);
+      }
+    });
+  };
+
+  const updateRow = ({ target }) => {
+    // Update query onKeyPress of input box
+    console.log(target.value);
+    setRow({
+        ...newRow,
+        id: tableData.length + 1,
+        [target.name]: target.value
+      }
+    );
+  };
+
+  const keyPressed = ({ key }) => {
+    // Capture search on Enter key
+    if (key === "Enter") {
+      addNewRow()
+    };
+  };
+
+  const submitHandler = e => {
+    // Prevent form submission on Enter key
+    e.preventDefault()
+  };
 
   useEffect(() => {
-    (async () => {
-      const result = await axios("https://api.tvmaze.com/search/shows?q=snow");
-      setData(result.data);
-    })();
-  }, []);
+      (async () => {
+        const result = await axios("https://raw.githubusercontent.com/StrategicFS/Recruitment/master/data.json");
+        setTableData(result.data);
+      })();
+    }, []);
 
   return (
+
     <div className="App">
-      <Table columns={columns} data={data} />
+      <Table columns={columns} data={tableData} handleDataChange={handleChange} deleteRow={deleteRow} />
+      <AddRow updateRow={updateRow} keyPressed={keyPressed} newRow={newRow} submitHandler={submitHandler} addNewRow={addNewRow} sumSelected={sumSelected}/>
     </div>
   );
 }
