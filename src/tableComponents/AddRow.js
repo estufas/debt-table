@@ -7,7 +7,7 @@ export default function AddRow({submitHandler, newRow, updateRow, keyPressed, ad
       <div>
         <input
           className="creditorName"
-          placeholder="creditor"
+          placeholder="Creditor"
           type="text"
           name="creditorName"
           value={newRow.creditorName}
