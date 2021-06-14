@@ -11,6 +11,7 @@ table td {
   padding: 0.5rem;
   border-bottom: 1px solid #ededed;
   border-right: 1px solid #ededed;
+  text-align: center;
   position: relative;
 }
 table th:last-child,
@@ -94,6 +95,13 @@ table th.sort-desc::before {
   border: solid 1px #fafafa;
 }
 
+.add-row-button:disabled,
+.add-row-button[disabled] {
+  color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(19, 1, 1, 0.3);
+  border-color: rgba(195, 195, 195, 0.3);
+}
+
 .add-row-form {
   width: 100%;
   margin: 15px 0px;
@@ -104,6 +112,8 @@ table th.sort-desc::before {
 .add-row-form div {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+  padding: 0px 20px;
 }
 
 .add-row-form div input {

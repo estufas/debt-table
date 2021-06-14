@@ -30,12 +30,13 @@ function App() {
           {
             Header: "Min Pay %",
             accessor: "minPaymentPercentage",
+            Cell: props => parseFloat(props.value),
             Footer: 'Min Pay %',
           },
           {
             Header: "Balance",
             accessor: "balance",
-            Cell: props => <div> ${props.value} </div>,
+            Cell: props => <div> ${parseFloat(props.value)} </div>,
             Footer: info => {
               // Only calculate total visits if rows change
               const total = useMemo(
@@ -68,6 +69,8 @@ function App() {
 
   // Set state for table data and new Row
   const [tableData, setTableData] = useState([]);
+  const [errorState, setErrorState] = useState("");
+  const [buttonState, setButtonState] = useState(true);
   const [newRow, setRow] = useState({
     id: "",
     firstName: "",
@@ -77,6 +80,16 @@ function App() {
     balance: 0
   });
 
+  const checkFields = (obj) => {
+    for(var i in obj)
+      if(!obj[i]) {
+        setButtonState( true);
+        return;
+      }
+    setButtonState(false);
+    return;
+  }
+
   // Receive data from TableRow
   const handleChange = data => {
     tableData[data.index] = data
@@ -84,19 +97,31 @@ function App() {
 
   // Add New Table Row
   const addNewRow = async (e) => {
-    let result = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", {
-      "functionName": "addRow",
-      "data": newRow
-    });
-    setTableData(result.data.data);
-    setRow({
-      id: "",
-      firstName: "",
-      lastName: "",
-      creditorName: "",
-      minPaymentPercentage: "",
-      balance: 0
-    })
+    try {
+      let result = await axios.post("https://uugye13j63.execute-api.us-east-1.amazonaws.com/debt-table", {
+        "functionName": "addRow",
+        "data": newRow
+      });
+      setTableData(result.data.data);
+      let resetRow = {
+        id: "",
+        firstName: "",
+        lastName: "",
+        creditorName: "",
+        minPaymentPercentage: "",
+        balance: 0
+      }
+      setRow(resetRow);
+      checkFields(resetRow);
+    } catch (err) {
+      if (err.response) {
+        setErrorState(err.response.data.message);
+        alert(err.response.data.message);
+      } else {
+        setErrorState('server error');
+        alert('server error');
+      };
+    };
   };
 
   // Reset table data to original state
@@ -125,13 +150,14 @@ function App() {
   const updateRow = ({ target }) => {
     // Update query onKeyPress of input box
     let value = target.value;
-    if (target.type == "text") value = value.charAt(0).toUpperCase() + value.slice(1);
+    if (target.type === "text") value = value.charAt(0).toUpperCase() + value.slice(1);
     setRow({
         ...newRow,
         id: tableData.length + 1,
         [target.name]: value
       }
     );
+    checkFields(newRow);
   };
 
   const keyPressed = ({ key }) => {
@@ -160,7 +186,7 @@ function App() {
 
     <div className="App">
       <Table columns={columns} data={tableData} handleDataChange={handleChange} deleteRow={deleteRow} resetDebtTable={resetDebtTable}/>
-      <AddRow updateRow={updateRow} keyPressed={keyPressed} newRow={newRow} submitHandler={submitHandler} addNewRow={addNewRow} />
+      <AddRow buttonState={buttonState} updateRow={updateRow} keyPressed={keyPressed} newRow={newRow} submitHandler={submitHandler} addNewRow={addNewRow} />
     </div>
   );
 }

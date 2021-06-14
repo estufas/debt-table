@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useTable, useFilters, useSortBy, useRowSelect } from "react-table";
 
 const IndeterminateCheckbox = React.forwardRef(
@@ -6,7 +6,7 @@ const IndeterminateCheckbox = React.forwardRef(
     const defaultRef = React.useRef()
     const resolvedRef = ref || defaultRef
 
-    React.useEffect(() => {
+    useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate
     }, [resolvedRef, indeterminate])
 
@@ -28,7 +28,6 @@ export default function Table({ columns, data, deleteRow, resetDebtTable }) {
       rows,
       prepareRow,
       selectedFlatRows,
-      state: { selectedRowIds },
     } = useTable(
     {
       columns,
@@ -63,6 +62,7 @@ export default function Table({ columns, data, deleteRow, resetDebtTable }) {
         <button
           className="delete-button"
           type="button"
+          disabled={selectedFlatRows.length <= 0}
           onClick={() => {
             deleteRow(selectedFlatRows);
           }}

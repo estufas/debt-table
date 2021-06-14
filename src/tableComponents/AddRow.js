@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React , { useState }from "react";
 
-export default function AddRow({submitHandler, newRow, updateRow, keyPressed, addNewRow}) {
+export default function AddRow({submitHandler, newRow, updateRow, keyPressed, addNewRow, buttonState}) {
 
   return (
     <form id="add-row-form-id" className="add-row-form" onSubmit={submitHandler}>
@@ -53,6 +53,7 @@ export default function AddRow({submitHandler, newRow, updateRow, keyPressed, ad
         <button
           className="add-row-button"
           type="button"
+          disabled={buttonState}
           onClick={addNewRow}
         >
           Add Row
